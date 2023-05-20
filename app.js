@@ -6,6 +6,7 @@ const campsiteRouter = require('./routes/campsiteRouter');
 const promotionRouter = require('./routes/promotionRouter');
 const partnerRouter = require('./routes/partnerRouter');
 const uploadRouter = require('./routes/uploadRouter');
+const favoritesRouter = require('./routes/favoritesRouter');
 
 const config = require('./config');
 
@@ -58,6 +59,7 @@ app.use('/campsites', campsiteRouter);
 app.use('/promotions', promotionRouter);
 app.use('/partners', partnerRouter);
 app.use('/imageUpload', uploadRouter);
+app.use('/favorites', favoritesRouter);
 
 app.use(function(req, res, next) {
   next(createError(404));
