@@ -7,10 +7,7 @@ const Campsite = require('../models/campsite');
 const favoritesRouter = express.Router();
 
 favoritesRouter.route('/')
-.options(cors.corsWithOptions, (req, res) => {
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'application/json');
-})
+.options(cors.corsWithOptions, (req, res) => res.sendStatus(200))
 .get(cors.cors, authenticate.verifyUser, (req, res, next) => {
     Favorite.find({user: req.user._id})
     .populate('user')
@@ -79,10 +76,7 @@ favoritesRouter.route('/')
 });
 
 favoritesRouter.route('/:campsiteId')
-.options(cors.corsWithOptions, (req, res) => {
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'application/json');
-})
+.options(cors.corsWithOptions, (req, res) => res.sendStatus(200))
 .get(cors.cors, authenticate.verifyUser, (req, res) => {
     res.statusCode = 403;
     res.setHeader('Content-Type', 'text/plain');
@@ -116,16 +110,11 @@ favoritesRouter.route('/:campsiteId')
                 res.end('That campsite is already in the list of favorites!');
             }
         } else {
-            Favorite.create({user: req.user._id})
+            Favorite.create({ user: req.user._id, campsites: [req.params.campsiteId] })
             .then(favorites => {
-                favorites.campsites.push(req.params.campsiteId);
-                favorites.save()
-                .then(favorites => {
-                    res.statusCode = 200;
-                    res.setHeader('Content-Type', 'application/json');
-                    res.json(favorites);
-                })
-                .catch(err => next(err));
+                res.statusCode = 200;
+                res.setHeader('Content-Type', 'application/json');
+                res.json(favorites);
             })
             .catch(err => next(err));
         }
@@ -142,7 +131,9 @@ favoritesRouter.route('/:campsiteId')
     .then(favorites => {
         if(favorites) {
             const index = favorites.campsites.indexOf(req.params.campsiteId);
-            favorites.campsites.splice(index, 1);
+            if (index >= 0) {
+                favorites.campsites.splice(index, 1);
+            }
             favorites.save()
             .then(favorites => {
                 res.statusCode = 200;
@@ -151,7 +142,7 @@ favoritesRouter.route('/:campsiteId')
             })
             .catch(err => next(err));
         } else {
-            res.statusCode = 404;
+            res.statusCode = 200;
             res.setHeader('Content-Type', 'text/plain');
             res.end('Favorite not found');
         }
